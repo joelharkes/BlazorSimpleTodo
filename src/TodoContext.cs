@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class TodoContext : DbContext
 {
+    public const string DbName = "database.db";
     public DbSet<TodoList> TodoLists { get; set; }
     public DbSet<TodoItem> TodoItems { get; set; }
 
@@ -13,7 +14,7 @@ public class TodoContext : DbContext
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
-        DbPath = System.IO.Path.Join(path, "database.db");
+        DbPath = System.IO.Path.Join(path, DbName);
     }
 
     // The following configures EF to create a Sqlite database file in the
