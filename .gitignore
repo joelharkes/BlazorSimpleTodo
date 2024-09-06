@@ -262,3 +262,4 @@ __pycache__/
 
 # Additional custom files
 database.db
+.DS_Store
