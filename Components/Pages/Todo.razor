@@ -2,16 +2,16 @@
 @using Microsoft.EntityFrameworkCore
 @rendermode InteractiveServer
 @inject IDbContextFactory<TodoContext> ContextFactory;
-
+@inject NavigationManager Navigation
 <PageTitle>Todo</PageTitle>
 
-<h1>Todo list</h1>
+<h1>All Todo list</h1>
 
 <p role="status">Current count: @(todos.Count())</p>
 <ul class="list-group">
     @foreach (var (item, index) in todos.Select((item, index) => (item, index)))
     {
-        <li class="list-group-item d-flex justify-content-between align-items-center">
+        <li @onclick="@(() => NavigateToTodoList(index))" class="list-group-item d-flex justify-content-between align-items-center">
             <input @onchange="@(() => ToggledChecked(index))" class="form-check-input me-1" type="checkbox" checked="@(item.CheckedAt != null)" aria-label="CheckOf">
             <div class="ms-2 flex-grow-1 @((item.CheckedAt != null ? "text-decoration-line-through" : ""))"> @item.Name </div>
             <button class="badge bg-danger rounded-pill" @onclick="@(()=> RemoveItem(index) )">x</button>
@@ -29,6 +29,12 @@
 
     [Parameter]
     public string AddText { get; set; } = "";
+
+
+    private void NavigateToTodoList(int index)
+    {
+        Navigation.NavigateTo("todo-list/" + todos[index].TodoListId);
+    }
 
     protected override async Task OnInitializedAsync(){
         var db = ContextFactory.CreateDbContext();

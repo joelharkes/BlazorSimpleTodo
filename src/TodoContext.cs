@@ -36,9 +36,9 @@ public class TodoList
 public class TodoItem
 {
     public int TodoItemId { get; set; }
-    public required string Title { get; set; }
-    public required string Content { get; set; }
+    public required string Name { get; set; }
+    public DateTime? CheckedAt {get; set;}
 
     public int TodoListId { get; set; }
-    public required TodoList TodoList { get; set; }
+    public TodoList? TodoList { get; set; }
 }

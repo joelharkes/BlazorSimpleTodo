@@ -1,0 +1,77 @@
+@page "/todo-list/{Id:int}"
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject IDbContextFactory<TodoContext> ContextFactory;
+
+<PageTitle>List @(todoList?.Name)</PageTitle>
+
+<h1>List @(todoList?.Name)</h1>
+
+<p role="status">Current count: @(todos.Count())</p>
+<ul class="list-group">
+    @foreach (var (item, index) in todos.Select((item, index) => (item, index)))
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <input @onchange="@(() => ToggledChecked(index))" class="form-check-input me-1" type="checkbox" checked="@(item.CheckedAt != null)" aria-label="CheckOf">
+            <div class="ms-2 flex-grow-1 @((item.CheckedAt != null ? "text-decoration-line-through" : ""))"> @item.Name </div>
+            <button class="badge bg-danger rounded-pill" @onclick="@(()=> RemoveItem(index) )">x</button>
+            </li> 
+    }
+</ul>
+<form @onsubmit="AddItem">
+    <input type="text" @bind="AddText" />
+    <button class="btn btn-primary" type="submit">Add item</button>
+
+</form>
+
+@code {
+    public List<TodoItem> todos = new List<TodoItem> { };
+    public TodoList todoList = new TodoList(){ Name = "Loading..."};
+    [Parameter]
+    public int Id { get; set; }
+
+
+
+    [Parameter]
+    public string AddText { get; set; } = "";
+
+    protected override async Task OnInitializedAsync(){
+        var db = ContextFactory.CreateDbContext();
+        todoList = await db.TodoLists.FindAsync(Id);
+        todos = await db.TodoItems.Where(x => x.TodoListId == Id).ToListAsync();
+    }
+    private void AddItem()
+    {
+        var item = new TodoItem { Name = AddText, TodoListId = Id };
+        var context =ContextFactory.CreateDbContext();
+        context.TodoItems.Add(item);
+        context.SaveChanges();
+        todos.Add(item);
+        AddText = "";
+    }
+
+    private void RemoveItem(int index)
+    {
+        todos.RemoveAt(index);
+        var context =ContextFactory.CreateDbContext();
+        context.TodoItems.Remove(todos[index]);
+        context.SaveChanges();
+    }
+
+    private void ToggledChecked(int index)
+    {
+        var context =ContextFactory.CreateDbContext();
+        var item = todos[index];
+        if(item.CheckedAt == null)
+        {
+            item.CheckedAt = DateTime.Now;
+        }
+        else
+        {
+            item.CheckedAt = null;
+        }
+        context.TodoItems.Update(item);
+        context.SaveChanges();
+    }
+    
+}
